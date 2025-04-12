@@ -1,0 +1,16 @@
+<Context>
+    <Manager className="org.apache.catalina.session.PersistentManager"
+             saveOnRestart="true">
+        <Store className="org.apache.catalina.session.FileStore"
+               directory="C:/Program Files/apache-tomcat-10.1.36/temp/sessions"/>
+    </Manager>
+    <Resource name="jdbc/JavaServletsDB"
+              auth="Container"
+              type="javax.sql.DataSource"
+              factory="com.example.servlets.javaservletsnew.dbService.EnvAwareDataSourceFactory"
+              maxTotal="100"
+              maxIdle="30"
+              maxWaitMillis="10000"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+    />
+</Context>

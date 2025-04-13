@@ -1,16 +1,7 @@
 package org.example.servlets.javaservletsnew.models;
 
-import org.example.servlets.javaservletsnew.dbService.DatabaseConnection;
 import org.example.servlets.javaservletsnew.dbService.HibernateConfig;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class UserStore {
 

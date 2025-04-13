@@ -28,12 +28,15 @@ public class RegisterServlet extends HttpServlet {
                 request.getRequestDispatcher("/register.jsp").forward(request, response);
             } else {
                 User newUser = new User(username, password, email);
-                UserStore.addUser(newUser);
-
-                request.getSession().setAttribute("username", username);
-                response.sendRedirect(request.getContextPath() + "/files");
+                if (UserStore.addUser(newUser)) {
+                    request.getSession().setAttribute("username", username);
+                    response.sendRedirect(request.getContextPath() + "/files");
+                } else {
+                    request.setAttribute("error", "Этот email уже используется");
+                    request.getRequestDispatcher("/register.jsp").forward(request, response);
+                }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

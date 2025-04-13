@@ -36,7 +36,7 @@ public class LoginServlet extends HttpServlet {
                 request.setAttribute("error", "Неверное имя пользователя или пароль");
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

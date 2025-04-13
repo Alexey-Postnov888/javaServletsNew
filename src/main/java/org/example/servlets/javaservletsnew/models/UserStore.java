@@ -1,6 +1,9 @@
 package org.example.servlets.javaservletsnew.models;
 
 import org.example.servlets.javaservletsnew.dbService.DatabaseConnection;
+import org.example.servlets.javaservletsnew.dbService.HibernateConfig;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,36 +13,58 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserStore {
-    private static final Map<String, User> users = new HashMap<>();
 
-    public static void addUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getPassword());
-            statement.setString(3, user.getEmail());
-            statement.executeUpdate();
+    public static boolean addUser(User user) {
+        if (isEmailExists(user.getEmail())) {
+            return false;
+        }
+        try (Session session = HibernateConfig.getSession()) {
+            session.beginTransaction();
+            session.persist(user);
+            session.getTransaction().commit();
+            return true;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return false;
         }
     }
-    public static User getUser(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE username = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, username);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return new User(
-                        resultSet.getString("username"),
-                        resultSet.getString("password"),
-                        resultSet.getString("email")
-                );
+
+    public static User getUser(String username) {
+        User user = null;
+        try (Session session = HibernateConfig.getSession()) {
+            user = session.byNaturalId(User.class).using("_username", username).load();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return user;
+        }
+        return user;
+    }
+
+    public static boolean isEmailExists(String email) {
+        try (Session session = HibernateConfig.getSession()) {
+            session.beginTransaction();
+            User user = session.createQuery(
+                            "FROM User WHERE _email = :email", User.class)
+                    .setParameter("email", email.trim())
+                    .uniqueResult();
+            session.getTransaction().commit();
+            return user != null;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return false;
+        }
+    }
+    public static boolean validateUser(String username, String password) {
+        try {
+            User user = getUser(username);
+            if (user == null) {
+                return false;
             }
+
+            return password != null && password.equals(user.getPassword());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
         }
-        return null;
-    }
-    public static boolean validateUser(String username, String password) throws SQLException {
-        User user = getUser(username);
-        return user != null && user.getPassword().equals(password);
     }
 }
